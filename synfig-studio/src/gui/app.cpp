@@ -45,6 +45,8 @@
 #elif defined(HAVE_SYS_ERRNO_H)
 #include <sys/errno.h>
 #endif
+#include <gtkmm/window.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/accelmap.h>
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/dialog.h>
@@ -103,6 +105,7 @@
 
 #include <synfigapp/canvasinterface.h>
 #include <synfigapp/actions/layersetdesc.h>
+#include <dialogs/dialog_setup.h>
 
 #include "statemanager.h"
 
@@ -515,6 +518,7 @@ studio::add_action_group_to_top(Glib::RefPtr<studio::UIManager> ui_manager, Glib
 	}
 }
 */
+
 class Preferences : public synfigapp::Settings
 {
 public:
@@ -1405,6 +1409,47 @@ DEFINE_ACTION("keyframe-properties", _("Properties"));
 #endif
 
 /* === M E T H O D S ======================================================= */
+
+Dialog_Setup::Dialog_Setup(Gtk::Window& parent):
+	Dialog_Template(parent,_("Synfig Studio Preferences")),
+	input_settings(synfigapp::Main::get_selected_input_device()->settings()),
+	adj_recent_files(Gtk::Adjustment::create(15,1,50,1,1,0)),
+	adj_undo_depth(Gtk::Adjustment::create(100,10,5000,1,1,1)),
+	time_format(Time::FORMAT_NORMAL),
+	listviewtext_brushes_path(manage (new Gtk::ListViewText(1, true, Gtk::SELECTION_BROWSE))),
+	adj_pref_x_size(Gtk::Adjustment::create(480,1,10000,1,10,0)),
+	adj_pref_y_size(Gtk::Adjustment::create(270,1,10000,1,10,0)),
+	adj_pref_fps(Gtk::Adjustment::create(24.0,1.0,100,0.1,1,0)),
+	pref_modification_flag(false),
+	refreshing(false)
+{
+	synfig::String
+		interface_str(_("Interface")),
+		document_str(_("Document")),
+		editing_str(_("Editing")),
+		render_str(_("Render")),
+		system_str(_("System"));
+	// WARNING FIXED ORDER : the page added to notebook same has treeview
+	// Interface
+	create_interface_page(add_page(interface_str));
+	// Document
+	create_document_page(add_page(document_str));
+	// Editing
+	create_editing_page(add_page(editing_str));
+	// Render
+	create_render_page(add_page(render_str));
+	// System
+	create_system_page(add_page(system_str));
+
+	show_all_children();
+}
+
+
+void
+Dialog_Setup::on_apply_pressed()
+{
+	App::resize_imported_images       = toggle_resize_imported_images.get_active();
+}
 
 App::App(const synfig::String& basepath, int *argc, char ***argv):
 	Gtk::Main(argc,argv)
@@ -2499,9 +2544,18 @@ App::dialog_open_file(const std::string &title, std::string &filename, std::stri
 	dialog->set_current_folder(prev_path);
 	dialog->add_button(_("Cancel"), Gtk::RESPONSE_CANCEL)->set_image_from_icon_name("gtk-cancel", Gtk::ICON_SIZE_BUTTON);
 	dialog->add_button(_("Import"), Gtk::RESPONSE_ACCEPT)->set_image_from_icon_name("gtk-open",   Gtk::ICON_SIZE_BUTTON);
-
+	// dialog->add_button(_("Import22"), Gtk::RESPONSE_ACCEPT)->set_image_from_icon_name("gtk-open",   Gtk::ICON_SIZE_BUTTON);
+	dialog->add_button(_("Scale"), Gtk::RESPONSE_ACCEPT)->set_image_from_icon_name("gtk-open",   Gtk::CheckButton);
+	toggle_resize_imported_images.set_halign(Gtk::ALIGN_START);
+	toggle_resize_imported_images.set_hexpand(false);
 	// 0 All supported files
 	// 0.1 Synfig documents. sfg is not supported to import
+	// attach_label(pi.grid,_("Scale to fit canvas"), ++row);
+	// pi.grid->attach(toggle_resize_imported_images, 1, row, 1, 1);
+	// toggle_resize_imported_images.set_tooltip_text(_("When you import images, check this option if you want they fit the Canvas size."));
+	// toggle_resize_imported_images.set_halign(Gtk::ALIGN_START);
+	// toggle_resize_imported_images.set_hexpand(false);
+
 	Glib::RefPtr<Gtk::FileFilter> filter_supported = Gtk::FileFilter::create();
 	filter_supported->set_name(_("All supported files"));
 	filter_supported->add_mime_type("application/x-sif");

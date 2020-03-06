@@ -272,7 +272,7 @@ fi
 	--disable-static \
 	--enable-shared \
 	${CONFIGURE_OPTIONS} \
-	--enable-warnings=max $DEBUG
+	--enable-warnings=max $DEBUG --without-images
 cd ..
 }
 
