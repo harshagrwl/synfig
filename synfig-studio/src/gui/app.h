@@ -28,6 +28,7 @@
 #ifndef __SYNFIG_STUDIO_APP_H
 #define __SYNFIG_STUDIO_APP_H
 
+
 /* === H E A D E R S ======================================================= */
 #include <sigc++/sigc++.h>
 #include <gtkmm/main.h>
@@ -45,6 +46,8 @@
 #include <synfig/filecontainerzip.h>
 
 #include <gtkmm/uimanager.h>
+#include <gtkmm/window.h>
+#include <gtkmm/checkbutton.h>
 #include <synfigapp/instance.h>
 #include <synfigapp/canvasinterface.h>
 #include "pluginmanager.h"

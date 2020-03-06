@@ -24,6 +24,7 @@ set -e
 
 export TYPE="_debug"
 export DEBUG=1
+export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 
 WORKDIR=`dirname "$0"`
 pushd "${WORKDIR}" > /dev/null
